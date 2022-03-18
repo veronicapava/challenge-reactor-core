@@ -23,8 +23,6 @@ public class CSVUtilTest {
         assert list.size() == 18207;
     }
 
-    //Filtrar jugadores mayores de 35 con Stream
-
     @Test
     void stream_filtrarJugadoresMayoresA35(){
         List<Player> list = CsvUtilFile.getPlayers();
@@ -42,9 +40,6 @@ public class CSVUtilTest {
 
         assert listFilter.size() == 322;
     }
-
-
-    //Filtrar jugadores mayores de 35 con Reactor
 
     @Test
     void reactive_filtrarJugadoresMayoresA35(){
@@ -66,30 +61,4 @@ public class CSVUtilTest {
 
         assert listFilter.block().size() == 322;
     }
-
-    //Filtrar jugadores mayores de 34 con Reactor
-
-    @Test
-    void reactive_filtrarJugadoresMayoresA34(){
-        List<Player> list = CsvUtilFile.getPlayers();
-        Flux<Player> listFlux = Flux.fromStream(list.parallelStream()).cache();
-        Mono<Map<String, Collection<Player>>> listFilter = listFlux
-                .filter(player -> player.age > 34)
-                .map(player -> {
-                    player.name = player.name.toUpperCase(Locale.ROOT);
-                    return player;
-                })
-                .buffer(100)
-                .flatMap(playerA -> listFlux
-                        .filter(playerB -> playerA.stream()
-                                .anyMatch(a ->  a.club.equals(playerB.club)))
-                )
-                .distinct()
-                .collectMultimap(Player::getClub);
-
-        assert listFilter.block().size() == 322;
-    }
-
-
-
 }
